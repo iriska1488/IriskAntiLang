@@ -1,0 +1,16 @@
+name: IriskAntiLang
+version: 1.1
+main: wtf.iriska.IriskAntiLang
+api-version: 1.16
+authors: [Iriska]
+commands:
+  iriskantilang:
+    description: "Управление плагином IriskAntiLang"
+    usage: "/iriskantilang reload"
+permissions:
+  iriskantilang.reload:
+    description: "Позволяет перезагружать конфигурацию плагина"
+    default: op
+  iriskantilang.bypass:
+    description: "Позволяет обходить проверку на смешение алфавитов"
+    default: false
