@@ -13,9 +13,9 @@ import java.util.Set;
 import java.util.logging.Level;
 
 /**
- * Плагин для обнаружения и блокировки сообщений со смешанными алфавитами
+ * Плагин для обнаружения и блокировки слов со смешанными алфавитами
  * Автор: Iriska
- * Версия: 1.1
+ * Версия: 1.2
  */
 public class IriskAntiLang extends JavaPlugin implements Listener {
 
@@ -56,20 +56,20 @@ public class IriskAntiLang extends JavaPlugin implements Listener {
     private void reloadConfiguration() {
         reloadConfig();
         config = getConfig();
-
+        
         // Установка значений по умолчанию, если их нет в конфиге
-        config.addDefault("warning-message", "&cВаше сообщение кажется подозрительным!");
+        config.addDefault("warning-message", "&cНе смешивайте алфавиты в одном слове!");
         config.addDefault("cancel-message", true);
         config.addDefault("bypass-permissions", new String[]{"iriskantilang.bypass"});
-
+        
         warningMessage = ChatColor.translateAlternateColorCodes('&', config.getString("warning-message"));
         cancelMessage = config.getBoolean("cancel-message");
-
+        
         bypassPermissions = new HashSet<>();
         for (String perm : config.getStringList("bypass-permissions")) {
             bypassPermissions.add(perm.toLowerCase());
         }
-
+        
         saveConfig();
     }
 
@@ -83,13 +83,16 @@ public class IriskAntiLang extends JavaPlugin implements Listener {
             return;
         }
 
-        // Проверка на смешение алфавитов
-        if (hasMixedAlphabets(message)) {
-            player.sendMessage(warningMessage);
-
-            if (cancelMessage) {
-                event.setCancelled(true);
-                logViolation(player, message);
+        // Разбиваем сообщение на слова и проверяем каждое
+        for (String word : message.split("\\s+")) {
+            if (hasMixedAlphabets(word)) {
+                player.sendMessage(warningMessage);
+                
+                if (cancelMessage) {
+                    event.setCancelled(true);
+                    logViolation(player, word);
+                }
+                break; // Прекращаем проверку после первого нарушения
             }
         }
     }
@@ -103,14 +106,14 @@ public class IriskAntiLang extends JavaPlugin implements Listener {
         return false;
     }
 
-    private boolean hasMixedAlphabets(String text) {
+    private boolean hasMixedAlphabets(String word) {
         boolean hasCyrillic = false;
         boolean hasLatin = false;
 
-        for (int i = 0; i < text.length(); i++) {
-            char c = text.charAt(i);
-
-            // Пропускаем пробелы и специальные символы
+        for (int i = 0; i < word.length(); i++) {
+            char c = word.charAt(i);
+            
+            // Пропускаем не-буквенные символы
             if (!Character.isLetter(c)) {
                 continue;
             }
@@ -121,7 +124,7 @@ public class IriskAntiLang extends JavaPlugin implements Listener {
                 hasLatin = true;
             }
 
-            // Если найдены оба алфавита, возвращаем true
+            // Если найдены оба алфавита в одном слове
             if (hasCyrillic && hasLatin) {
                 return true;
             }
@@ -140,8 +143,8 @@ public class IriskAntiLang extends JavaPlugin implements Listener {
         return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
     }
 
-    private void logViolation(Player player, String message) {
-        getLogger().log(Level.WARNING, "Игрок {0} пытался отправить сообщение со смешанными алфавитами: {1}",
-                new Object[]{player.getName(), message});
+    private void logViolation(Player player, String word) {
+        getLogger().log(Level.WARNING, "Игрок {0} использовал смешение алфавитов в слове: {1}",
+                new Object[]{player.getName(), word});
     }
 }
