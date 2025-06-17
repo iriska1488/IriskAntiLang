@@ -58,7 +58,7 @@ public class IriskAntiLang extends JavaPlugin implements Listener {
         config = getConfig();
         
         // Установка значений по умолчанию, если их нет в конфиге
-        config.addDefault("warning-message", "&cНе смешивайте алфавиты в одном слове!");
+        config.addDefault("warning-message", "&cВаше сообщение кажется подозрительным!");
         config.addDefault("cancel-message", true);
         config.addDefault("bypass-permissions", new String[]{"iriskantilang.bypass"});
         
